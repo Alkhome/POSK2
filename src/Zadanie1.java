@@ -2,6 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 
@@ -11,7 +14,6 @@ public class Zadanie1 implements ActionListener {
     JLabel wait = new JLabel();
     JLabel press = new JLabel();
     int number_of_rounds = -1;
-    int bad_presses_1 = 0;
     long beggining_time = -1;
     long pressed_time = -1;
     long[] reaction_times = new long[5];
@@ -46,6 +48,19 @@ public class Zadanie1 implements ActionListener {
         bg_changed.setHorizontalAlignment(SwingConstants.CENTER);
         bg_changed.setVisible(true);
         ramka.add(bg_changed);
+
+        try {
+            File wyniki = new File("scores.txt");
+            if (wyniki.createNewFile()) {
+                System.out.println("Stworzono plik: " + wyniki.getName());
+                FileWriter myWriter = new FileWriter("scores.txt");
+                myWriter.write("2147483647\n2147483647");
+                myWriter.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Wystapil blad z plikiem.");
+            e.printStackTrace();
+        }
 
         JOptionPane.showMessageDialog(null, """
                 Witaj w grze, mierzacej czas reakcji!
@@ -122,7 +137,6 @@ public class Zadanie1 implements ActionListener {
                 if (beggining_time == -1) {
                     JOptionPane.showMessageDialog(null, "Nacisnales przycisk za szybko!",
                             "Uwaga!", JOptionPane.INFORMATION_MESSAGE);
-                    bad_presses_1++;
                 } else if (beggining_time > 0) {
                     System.out.println(number_of_rounds);
                     pressed_time = System.currentTimeMillis();
