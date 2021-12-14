@@ -5,7 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -13,7 +14,6 @@ public class Zadanie2 implements ActionListener {
     static JFrame ramka = new JFrame();
     JButton audio_played = new JButton("Przycisk");
     int number_of_rounds = -1;
-    int bad_presses_2 = 0;
     long beggining_time = -1;
     long pressed_time = -1;
     long[] reaction_times = new long[5];
@@ -42,6 +42,89 @@ public class Zadanie2 implements ActionListener {
                 "Uwaga!", JOptionPane.INFORMATION_MESSAGE);
 
         playing_audio();
+
+    }
+    public void czy_lepszy_wynik(long obecny_wynik)
+    {
+        String end_message = "";
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("scores.txt"));
+            String line = reader.readLine();
+            java.util.List<String> temp_array = new ArrayList<>();
+
+            while (line != null)
+            {
+                temp_array.add(line);
+                line = reader.readLine();
+            }
+            String[] tempsArray = temp_array.toArray(new String[0]);
+            System.out.println(tempsArray[0]);
+            System.out.println(tempsArray[1]);
+
+            if(Integer.parseInt(tempsArray[0]) > obecny_wynik)
+            {
+                if(Integer.parseInt(tempsArray[0]) == 2147483647){
+                    end_message += "Ustanowiłeś nowy najwyższy wynik!\n";
+                }
+                else
+                {
+                    end_message += "Gratulacje! Pobiłeś swój obecny wynik o: " + (Integer.parseInt(tempsArray[0])-obecny_wynik)  + " ms\n";
+                }
+                try {
+                FileWriter myWriter = new FileWriter("scores.txt", false);
+                tempsArray[0] = String.valueOf(obecny_wynik);
+                    for (String s : tempsArray) {
+                        myWriter.write(s + "\n");
+                        System.out.println(s);
+                    }
+                myWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            }
+            else if (Integer.parseInt(tempsArray[0]) == obecny_wynik)
+            {
+                end_message += "Wyrównałeś do najwyższego wyniku\n";
+            }
+            else
+            {
+                end_message += "Nie udało Ci się pobić najwyższego wyniku\n";
+            }
+
+            if(Integer.parseInt(tempsArray[1]) > obecny_wynik) {
+                if (Integer.parseInt(tempsArray[1]) != 2147483647) {
+                    end_message += "Gratulacje! Pobiłeś swój poprzedni wynik o: " + ((Integer.parseInt(tempsArray[1])) - obecny_wynik) + " ms\n";
+                }
+                else {
+                    end_message += "";
+                }
+            }
+            else if (Integer.parseInt(tempsArray[1]) == obecny_wynik)
+            {
+                end_message += "Osiągnałeś taki sam wynik jak ostatnio\n";
+            }
+            else
+            {
+                end_message += "Nie udało Ci się pobić ostatniego wyniku\n";
+            }
+            try {
+                FileWriter myWriter = new FileWriter("scores.txt", false);
+                tempsArray[1] = String.valueOf(obecny_wynik);
+                for (String s : tempsArray) {
+                    myWriter.write(s + "\n");
+                    System.out.println(s);
+                }
+                myWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(obecny_wynik);
+        JOptionPane.showMessageDialog(null, end_message,
+                "Podsumowanie", JOptionPane.INFORMATION_MESSAGE);
 
     }
 
@@ -99,7 +182,6 @@ public class Zadanie2 implements ActionListener {
                 if (beggining_time == -1) {
                     JOptionPane.showMessageDialog(null, "Nacisnales przycisk za szybko!",
                             "Uwaga!", JOptionPane.INFORMATION_MESSAGE);
-                    bad_presses_2++;
                 } else if (beggining_time > 0) {
                     System.out.println(number_of_rounds);
                     pressed_time = System.currentTimeMillis();
@@ -115,14 +197,16 @@ public class Zadanie2 implements ActionListener {
                             sum_of_times += reactionTime;
                         }
                         long average_of_times = sum_of_times / reaction_times.length;
+                        long avg_overall = (average_of_times+visual_reaction_time)/2;
 
                         JOptionPane.showMessageDialog(null, "Twoj sredni czas reakcji to: " +
                                         average_of_times + " ms\n",
                                 "Koniec poziomu!", JOptionPane.INFORMATION_MESSAGE);
-                        JOptionPane.showMessageDialog(null, "Twoj sredni czas reakcji" +
+                        JOptionPane.showMessageDialog(null, "Twoj sredni czas reakcji " +
                                         "podczas calego testu wynisol:\n" +
-                                        (average_of_times+visual_reaction_time)/2 + " ms\n",
+                                        avg_overall + " ms\n",
                                 "Koniec testu!", JOptionPane.INFORMATION_MESSAGE);
+                        czy_lepszy_wynik(avg_overall);
                         System.exit(0);
                     }
                     number_of_rounds++;
